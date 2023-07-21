@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import { ArrowBackIcon, AttachmentIcon, EditIcon } from "@chakra-ui/icons";
 import { Box, Container, Input, HStack, IconButton, VStack, Text, Image } from "@chakra-ui/react";
 import {
@@ -27,22 +27,16 @@ interface ChatMessage {
 
 function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  const fetchMessages = async (page: number) => {
+  const fetchData = async () => {
     try {
-      setIsLoading(true);
-      const data = await Messages(page);
+      const data = await Messages();
       if (Array.isArray(data)) {
-        setMessages((prevMessages) => [...prevMessages, ...data]);
-        setIsLoading(false);
+        setMessages(data);
       } else {
         throw new Error("Invalid data format received from the server.");
       }
     } catch (error) {
-      setIsLoading(false);
       if (error instanceof Error) {
         alert(error.message);
       } else {
@@ -50,53 +44,16 @@ function App() {
       }
     }
   };
-  
-  const handleScroll = () => {
-    const threshold = 200; // You can adjust this threshold as needed
-    if (
-      !isLoading &&
-      containerRef.current &&
-      containerRef.current.scrollTop <= threshold
-    ) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
-  
+
   useEffect(() => {
-    fetchMessages(currentPage);
-  }, [currentPage]);
-  
+    fetchData();
+  }, [])
+
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.addEventListener("scroll", handleScroll);
-      return () => {
-        containerRef.current?.removeEventListener("scroll", handleScroll);
-      };
+      containerRef.current.scrollIntoView({ block: "end" });
     }
-  }, []);
-
-  // const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-  // const fetchData = async () => {
-  //   try {
-  //     const data = await Messages();
-  //     if (Array.isArray(data)) {
-  //       setMessages(data);
-  //     } else {
-  //       throw new Error("Invalid data format received from the server.");
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       alert(error.message);
-  //     } else {
-  //       alert("An unknown error occurred.");
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [])
+  }, [messages]);
 
   return (
     <Box bg={"gray.800"}>
@@ -257,7 +214,7 @@ function App() {
                 />
               ))
             }
-
+          <div ref={containerRef}></div>
           </VStack>
 
           {/* Send Messages */}
