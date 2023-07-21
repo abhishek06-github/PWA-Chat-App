@@ -2,7 +2,7 @@
 This repository contains a React-based chat application that allows users to view and interact with chat messages. The application retrieves chat messages from a server and displays them in a visually appealing user interface.
 
 ## Features:
-Displays chat messages with avatars and timestamps.
+Displays chat messages with avatars and timestamps.<br>
 Support for both incoming and outgoing messages.
 Infinite scrolling to load more chat messages as the user scrolls up.
 Message components with self and other user layouts.
