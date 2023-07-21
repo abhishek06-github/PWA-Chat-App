@@ -3,12 +3,12 @@ This repository contains a React-based chat application that allows users to vie
 
 ## Features:
 Displays chat messages with avatars and timestamps.<br>
-Support for both incoming and outgoing messages.
-Infinite scrolling to load more chat messages as the user scrolls up.
-Message components with self and other user layouts.
-Avatars and tick indicators to represent sender details.
+Support for both incoming and outgoing messages.<br>
+Infinite scrolling to load more chat messages as the user scrolls up.<br>
+Message components with self and other user layouts.<br>
+Avatars and tick indicators to represent sender details.<br>
 ## Technologies Used:
-React: A popular JavaScript library for building user interfaces.
-Chakra UI: A simple and customizable component library for React.
-Axios: A promise-based HTTP client for making API requests.
-TypeScript: A superset of JavaScript that provides static typing and improved tooling for increased code safety and productivity.
+React: A popular JavaScript library for building user interfaces.<br>
+Chakra UI: A simple and customizable component library for React.<br>
+Axios: A promise-based HTTP client for making API requests.<br>
+TypeScript: A superset of JavaScript that provides static typing and improved tooling for increased code safety and productivity.<br>
