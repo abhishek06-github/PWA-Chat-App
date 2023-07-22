@@ -27,16 +27,26 @@ interface ChatMessage {
 
 function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [hasMorePages, setHasMorePages] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const fetchData = async () => {
+  const divForScroll = useRef<HTMLDivElement>(null);
+
+
+  const fetchData = async (page: number) => {
     try {
-      const data = await Messages();
+      setLoading(true);
+      const data = await Messages(page);
       if (Array.isArray(data)) {
-        setMessages(data);
+        setMessages((prevMessages) => [...data, ...prevMessages]);
+        setLoading(false);
+        setHasMorePages(data.length > 0);
       } else {
         throw new Error("Invalid data format received from the server.");
       }
     } catch (error) {
+      setLoading(false);
       if (error instanceof Error) {
         alert(error.message);
       } else {
@@ -45,15 +55,37 @@ function App() {
     }
   };
 
+  const handleScroll = () => {
+    const { scrollTop } = containerRef.current!;
+    if (scrollTop === 0 && hasMorePages && !loading) {
+      fetchData(currentPage + 1);
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
-  }, [])
+    fetchData(currentPage); // Fetch initial messages
+  }, []);
+
+
+  useEffect(() => {
+    if (divForScroll.current) {
+      divForScroll.current.scrollIntoView({ block: "end" });
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollIntoView({ block: "end" });
+      containerRef.current.addEventListener("scroll", handleScroll);
     }
-  }, [messages]);
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [currentPage, hasMorePages, loading]);
+
+
 
   return (
     <Box bg={"gray.800"}>
@@ -202,6 +234,7 @@ function App() {
                 display: "none"
               }
             }}
+            ref={containerRef}
           >
             {
               messages.map((item) => (
@@ -214,7 +247,7 @@ function App() {
                 />
               ))
             }
-          <div ref={containerRef}></div>
+          <div ref={divForScroll}></div>
           </VStack>
 
           {/* Send Messages */}
