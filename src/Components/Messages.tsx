@@ -1,9 +1,8 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
-const url = 'https://qa.corider.in/assignment/chat?page=0';
+const url = 'https://qa.corider.in/assignment/chat?page=';
 
 interface Message {
-  // Add types for the properties of the Message object here
   id: number;
   chats: object;
   message: string;
@@ -14,8 +13,7 @@ interface Message {
   };
 }
 
-export const Messages = async (): Promise<Message[]> => {
-  const { data } = await axios.get(url);
-  console.log(data);
+export const Messages = async (page: number): Promise<Message[]> => {
+  const { data } = await axios.get(`${url}${page}`);
   return data.chats as Message[];
 };
