@@ -30,6 +30,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMorePages, setHasMorePages] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const divForScroll = useRef<HTMLDivElement>(null);
 
@@ -39,7 +40,13 @@ function App() {
       setLoading(true);
       const data = await Messages(page);
       if (Array.isArray(data)) {
-        setMessages((prevMessages) => [...data, ...prevMessages]);
+        if (page === 0) {
+          // For the first page, replace the messages with the most recent data
+          setMessages(data);
+        } else {
+          // For older pages, append the data to the existing messages
+          setMessages((prevMessages) => [...data, ...prevMessages]);
+        }
         setLoading(false);
         setHasMorePages(data.length > 0);
       } else {
@@ -55,22 +62,30 @@ function App() {
     }
   };
 
+
+
   const handleScroll = () => {
-    const { scrollTop } = containerRef.current!;
-    if (scrollTop === 0 && hasMorePages && !loading) {
-      fetchData(currentPage + 1);
-      setCurrentPage((prevPage) => prevPage + 1);
+    const { scrollTop, clientHeight, scrollHeight } = containerRef.current!;
+    const threshold = 0.5; // Threshold for fetching older chats (20% from the top)
+    if (scrollTop < scrollHeight * threshold && hasMorePages && !loading && !isFetching) {
+      setIsFetching(true); // Set flag to prevent multiple fetches
+      fetchData(currentPage + 1)
+        .finally(() => {
+          setIsFetching(false); // Reset the flag after the response is received
+        });
+      setCurrentPage((prevPage) => prevPage + 1); // Update currentPage
     }
   };
 
+
   useEffect(() => {
-    fetchData(currentPage); // Fetch initial messages
+      fetchData(currentPage); // Fetch most recent messages
   }, []);
 
 
   useEffect(() => {
     if (divForScroll.current) {
-      divForScroll.current.scrollIntoView({ block: "end" });
+      divForScroll.current.scrollIntoView({ block: "center" });
     }
   }, [messages]);
 
@@ -83,7 +98,7 @@ function App() {
         containerRef.current.removeEventListener("scroll", handleScroll);
       }
     };
-  }, [currentPage, hasMorePages, loading]);
+  }, [hasMorePages, loading, isFetching]);
 
 
 
@@ -236,6 +251,7 @@ function App() {
             }}
             ref={containerRef}
           >
+
             {
               messages.map((item) => (
                 <Message
@@ -247,7 +263,6 @@ function App() {
                 />
               ))
             }
-          <div ref={divForScroll}></div>
           </VStack>
 
           {/* Send Messages */}
